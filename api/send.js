@@ -1,22 +1,24 @@
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 export default async function handler(req, res) {
 
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-
-  if (req.method === "OPTIONS") {
-    return res.status(200).end();
-  }
-
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Use POST" });
-  }
-
   try {
+
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+    if (req.method === "OPTIONS") {
+      return res.status(200).end();
+    }
+
+    if (!process.env.RESEND_API_KEY) {
+      return res.status(500).json({
+        error: "RESEND_API_KEY não existe no Vercel"
+      });
+    }
+
+    const resend = new Resend(process.env.RESEND_API_KEY);
 
     const itens = req.body?.itens ?? [];
 
@@ -35,7 +37,8 @@ export default async function handler(req, res) {
   } catch (error) {
 
     return res.status(500).json({
-      error: error.message
+      error: error.message,
+      stack: error.stack
     });
 
   }
