@@ -1,115 +1,34 @@
-import nodemailer from "nodemailer";
-import ExcelJS from "exceljs";
+import { Resend } from "resend";
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export default async function handler(req, res) {
 
-  // Libera acesso externo (Hoppscotch/site)
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader(
-    "Access-Control-Allow-Methods",
-    "POST, OPTIONS"
-  );
-  res.setHeader(
-    "Access-Control-Allow-Headers",
-    "Content-Type"
-  );
-
-  // Responde o preflight
-  if (req.method === "OPTIONS") {
-    return res.status(200).end();
-  }
-
-
   if (req.method !== "POST") {
-    return res.status(405).json({
-      erro: "Método não permitido"
-    });
+    return res.status(405).json({ error: "Method not allowed" });
   }
-
 
   try {
 
     const { itens } = req.body;
 
-
-    const workbook = new ExcelJS.Workbook();
-
-    const sheet = workbook.addWorksheet("Relatório");
-
-
-    sheet.columns = [
-      {
-        header: "Item",
-        key: "item"
-      },
-      {
-        header: "Quantidade",
-        key: "quantidade"
-      }
-    ];
-
-
-    itens.forEach(item => {
-
-      sheet.addRow({
-        item: item.nome,
-        quantidade: item.quantidade
-      });
-
-    });
-
-
-    const arquivo =
-      await workbook.xlsx.writeBuffer();
-
-
-    const transporter =
-      nodemailer.createTransport({
-
-        service: "outlook",
-
-        auth: {
-
-          user: process.env.EMAIL_USER,
-
-          pass: process.env.EMAIL_PASS
-
-        }
-
-      });
-
-
-    await transporter.sendMail({
-
-      from: process.env.EMAIL_USER,
-
-      to: process.env.EMAIL_USER,
-
+    await resend.emails.send({
+      from: "Embalagens <onboarding@resend.dev>",
+      to: "cassia@empresa.com",
       subject: "Relatório de Embalagens",
-
-      text: "Segue relatório.",
-
-      attachments: [
-        {
-          filename: "relatorio.xlsx",
-          content: arquivo
-        }
-      ]
-
+      html: `
+        <h2>Relatório</h2>
+        <pre>${JSON.stringify(itens, null, 2)}</pre>
+      `
     });
 
+    return res.status(200).json({ ok: true });
 
-    return res.status(200).json({
-      sucesso: true
-    });
-
-
-  } catch(error) {
+  } catch (error) {
 
     return res.status(500).json({
-      erro: error.message
+      error: error.message
     });
 
   }
-
 }
