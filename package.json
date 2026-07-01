@@ -1,9 +1,0 @@
-{
-  "name": "embalagens-api",
-  "version": "1.0.0",
-  "type": "module",
-  "dependencies": {
-    "nodemailer": "^6.9.0",
-    "exceljs": "^4.4.0"
-  }
-}
