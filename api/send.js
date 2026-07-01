@@ -3,19 +3,39 @@ import ExcelJS from "exceljs";
 
 export default async function handler(req, res) {
 
+  // Libera acesso externo (Hoppscotch/site)
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "POST, OPTIONS"
+  );
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Content-Type"
+  );
+
+  // Responde o preflight
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
+
+
   if (req.method !== "POST") {
     return res.status(405).json({
       erro: "Método não permitido"
     });
   }
 
+
   try {
 
     const { itens } = req.body;
 
+
     const workbook = new ExcelJS.Workbook();
 
     const sheet = workbook.addWorksheet("Relatório");
+
 
     sheet.columns = [
       {
@@ -65,43 +85,29 @@ export default async function handler(req, res) {
 
       to: process.env.EMAIL_USER,
 
-      subject:
-      "Relatório de Embalagens",
+      subject: "Relatório de Embalagens",
 
-      text:
-      "Segue relatório automático.",
+      text: "Segue relatório.",
 
-
-      attachments:[
-
+      attachments: [
         {
-
-          filename:
-          "relatorio.xlsx",
-
-          content:
-          arquivo
-
+          filename: "relatorio.xlsx",
+          content: arquivo
         }
-
       ]
 
     });
 
 
-    res.status(200).json({
-
-      sucesso:true
-
+    return res.status(200).json({
+      sucesso: true
     });
 
 
-  } catch(error){
+  } catch(error) {
 
-    res.status(500).json({
-
-      erro:error.message
-
+    return res.status(500).json({
+      erro: error.message
     });
 
   }
