@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "dependencies": {
-    "@vercel/blob": "latest"
+    "@vercel/blob": "^1.1.1"
     "resend": "^4.0.0",
     "xlsx": "^0.18.5"
   }
