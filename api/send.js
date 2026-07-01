@@ -24,7 +24,7 @@ export default async function handler(req, res) {
 
     const result = await resend.emails.send({
       from: "Embalagens <onboarding@resend.dev>",
-      to: "henrique.zandona@hyundai-brasil.com",
+      to: "henrique.zandonab@gmail.com",
       subject: "Relatório de Embalagens",
       html: `<pre>${JSON.stringify(itens, null, 2)}</pre>`
     });
