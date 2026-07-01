@@ -3,17 +3,9 @@ import { Resend } from "resend";
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export default async function handler(req, res) {
-
   try {
 
-    // DEBUG: mostra se API key existe
-    if (!process.env.RESEND_API_KEY) {
-      return res.status(500).json({
-        error: "RESEND_API_KEY não encontrada no Vercel"
-      });
-    }
-
-    // CORS
+    // CORS (evita erro no Hoppscotch)
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
     res.setHeader("Access-Control-Allow-Headers", "Content-Type");
@@ -26,9 +18,7 @@ export default async function handler(req, res) {
       return res.status(405).json({ error: "Use POST" });
     }
 
-    const body = req.body || {};
-
-    const itens = body.itens || [];
+    const itens = req.body?.itens || [];
 
     const result = await resend.emails.send({
       from: "Embalagens <onboarding@resend.dev>",
@@ -43,10 +33,8 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
-
     return res.status(500).json({
       error: error.message
     });
-
   }
 }
