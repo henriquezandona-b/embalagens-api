@@ -1,27 +1,30 @@
-import { put } from "@vercel/blob";
-
 export default async function handler(req, res) {
   try {
-    const blob = await put(
-      "teste.txt",
-      "Funcionou!",
+    const response = await fetch(
+      "https://api.vercel.com/v2/blob",
       {
-        access: "public",
-        addRandomSuffix: false,
-        allowOverwrite: true
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          pathname: "teste.txt",
+          content: Buffer.from("Funcionou!").toString("base64"),
+        }),
       }
     );
 
+    const data = await response.json();
+
     return res.status(200).json({
       ok: true,
-      url: blob.url,
-      pathname: blob.pathname
+      data,
     });
 
   } catch (err) {
     return res.status(500).json({
       ok: false,
-      erro: err.message
+      erro: err.message,
     });
   }
 }
