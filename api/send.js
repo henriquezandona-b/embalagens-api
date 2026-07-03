@@ -3,6 +3,7 @@ import { atualizarExcel } from "../lib/googleDrive.js";
 
 export default async function handler(req, res) {
   try {
+    // CORS
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
     res.setHeader("Access-Control-Allow-Headers", "Content-Type");
@@ -12,9 +13,7 @@ export default async function handler(req, res) {
     }
 
     if (req.method !== "POST") {
-      return res.status(405).json({
-        error: "Metodo nao permitido"
-      });
+      return res.status(405).json({ error: "Metodo nao permitido" });
     }
 
     if (!process.env.RESEND_API_KEY) {
@@ -35,8 +34,18 @@ export default async function handler(req, res) {
       });
     }
 
-    const divergencias = itens.filter((item) => Number(item.diferenca) !== 0);
+    // 1. Atualiza Google Drive (MESMO arquivo sempre)
+    const excelAtualizado = await atualizarExcel({
+      data,
+      itens,
+      excel
+    });
 
+    const divergencias = itens.filter(
+      (item) => Number(item.diferenca) !== 0
+    );
+
+    // 2. Envia email com Excel atualizado
     const result = await resend.emails.send({
       from: "Embalagens <onboarding@resend.dev>",
       to: "henrique.zandonab@gmail.com",
@@ -46,14 +55,14 @@ export default async function handler(req, res) {
         <p><strong>Dia:</strong> ${data}</p>
         <p><strong>Total de itens:</strong> ${itens.length}</p>
         <p><strong>Divergencias:</strong> ${divergencias.length}</p>
-        <p>O arquivo Excel esta anexado neste email.</p>
+        <p>O arquivo Excel foi atualizado no Google Drive e enviado anexado.</p>
       `,
       attachments: [
         {
-          filename: excel.nome || "embalagens-cassia.xlsx",
-          content: Buffer.from(excel.base64, "base64"),
+          filename: excelAtualizado.nome || "embalagens-cassia.xlsx",
+          content: Buffer.from(excelAtualizado.base64, "base64"),
           contentType:
-            excel.mimeType ||
+            excelAtualizado.mimeType ||
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         }
       ]
@@ -61,9 +70,13 @@ export default async function handler(req, res) {
 
     return res.status(200).json({
       ok: true,
-      result
+      drive: excelAtualizado.drive,
+      email: result
     });
+
   } catch (error) {
+    console.error(error);
+
     return res.status(500).json({
       error: error.message,
       stack: error.stack
