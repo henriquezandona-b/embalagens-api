@@ -1,4 +1,5 @@
 import { Resend } from "resend";
+import { atualizarExcel } from "../lib/googleDrive.js";
 
 export default async function handler(req, res) {
   try {
