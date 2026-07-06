@@ -35,7 +35,7 @@ console.log("TOTAL:", itens.length);
 
 for (const item of itens) {
 
-  console.log("Salvando:", item);
+  console.log("ITEM RECEBIDO:", item);
 
   const { data: retorno, error } = await supabase
     .from("conferencias")
@@ -49,12 +49,13 @@ for (const item of itens) {
     })
     .select();
 
-  console.log("RETORNO:", retorno);
-  console.log("ERRO:", error);
-
   if (error) {
-    console.error(error);
+    console.log("❌ ERRO SUPABASE:");
+    console.log(JSON.stringify(error, null, 2));
     return res.status(500).json(error);
+  }
+
+  console.log("✔ SALVO NO SUPABASE:", retorno);
   }
 }
     const excel = req.body?.excel;
