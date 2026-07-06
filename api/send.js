@@ -1,5 +1,6 @@
 import { Resend } from "resend";
 import { atualizarExcel } from "../lib/googleDrive.js";
+import { supabase } from "../lib/supabase.js";
 
 export default async function handler(req, res) {
   try {
