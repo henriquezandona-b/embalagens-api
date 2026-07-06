@@ -57,15 +57,14 @@ export default async function handler(req, res) {
         <p><strong>Divergencias:</strong> ${divergencias.length}</p>
         <p>O arquivo Excel foi atualizado no Google Drive e enviado anexado.</p>
       `,
-      attachments: [
-        {
-          filename: excelAtualizado.nome || "embalagens-cassia.xlsx",
-          content: Buffer.from(excelAtualizado.base64, "base64"),
-          contentType:
-            excelAtualizado.mimeType ||
-            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        }
-      ]
+     attachments: [
+  {
+    filename: "embalagens-cassia.xlsx",
+    content: excelAtualizado,
+    contentType:
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+  }
+]
     });
 
     return res.status(200).json({
