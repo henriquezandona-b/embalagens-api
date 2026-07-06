@@ -1,47 +1,41 @@
 import { supabase } from "../lib/supabase.js";
-import ExcelJS from "exceljs";
 
 export default async function handler(req, res) {
   try {
+    // Permitir GET
+    if (req.method !== "GET") {
+      return res.status(405).json({ error: "Metodo nao permitido" });
+    }
+
+    // Buscar dados do Supabase
     const { data, error } = await supabase
       .from("conferencias")
       .select("*")
       .order("id", { ascending: true });
 
     if (error) {
+      console.error("Erro Supabase:", error);
       return res.status(500).json(error);
     }
 
-    const workbook = new ExcelJS.Workbook();
-    const sheet = workbook.addWorksheet("Embalagens");
-
-    sheet.columns = [
-      { header: "ID", key: "id", width: 10 },
-      { header: "Data", key: "data", width: 20 },
-      { header: "Item", key: "item", width: 40 },
-      { header: "Contagem", key: "contagem", width: 15 },
-      { header: "Nota", key: "nota", width: 15 },
-      { header: "Diferenca", key: "diferenca", width: 15 },
-    ];
+    // Criar CSV
+    let csv = "ID,Data,Item,Contagem,Nota,Diferenca\n";
 
     data.forEach((row) => {
-      sheet.addRow(row);
+      csv += `${row.id},${row.data},${row.item},${row.contagem},${row.nota},${row.diferenca}\n`;
     });
 
-    const buffer = await workbook.xlsx.writeBuffer();
-
-    res.setHeader(
-      "Content-Type",
-      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    );
-
+    // Headers para download
+    res.setHeader("Content-Type", "text/csv; charset=utf-8");
     res.setHeader(
       "Content-Disposition",
-      "attachment; filename=embalagens.xlsx"
+      "attachment; filename=embalagens.csv"
     );
 
-    return res.send(buffer);
+    return res.status(200).send(csv);
+
   } catch (err) {
+    console.error("Erro geral:", err);
     return res.status(500).json({
       error: err.message,
     });
