@@ -27,6 +27,23 @@ export default async function handler(req, res) {
 
     const data = req.body?.data ?? "";
     const itens = req.body?.itens ?? [];
+    for (const item of itens) {
+  const { error } = await supabase
+    .from("conferencias")
+    .insert({
+      data: data,
+      item: item.item,
+      contagem: item.contagem,
+      nota: item.nota,
+      diferenca: item.diferenca,
+      finalizado: false
+    });
+
+  if (error) {
+    console.error(error);
+    return res.status(500).json(error);
+  }
+}
     const excel = req.body?.excel;
 
     if (!excel?.base64) {
