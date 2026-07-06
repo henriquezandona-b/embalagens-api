@@ -27,8 +27,13 @@ export default async function handler(req, res) {
 
     const data = req.body?.data ?? "";
     const itens = req.body?.itens ?? [];
+    console.log("DATA:", data);
+console.log("ITENS:", itens);
+console.log("TOTAL:", itens.length);
     for (const item of itens) {
-  const { error } = await supabase
+  console.log("Salvando:", item);
+
+  const { data: retorno, error } = await supabase
     .from("conferencias")
     .insert({
       data: data,
@@ -36,11 +41,14 @@ export default async function handler(req, res) {
       contagem: item.contagem,
       nota: item.nota,
       diferenca: item.diferenca,
-      finalizado: false
-    });
+      finalizado: false,
+    })
+    .select();
+
+  console.log("RETORNO:", retorno);
+  console.log("ERRO:", error);
 
   if (error) {
-    console.error(error);
     return res.status(500).json(error);
   }
 }
