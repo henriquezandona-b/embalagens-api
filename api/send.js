@@ -68,11 +68,9 @@ export default async function handler(req, res) {
     });
 
     return res.status(200).json({
-      ok: true,
-      drive: excelAtualizado.drive,
-      email: result
-    });
-
+  ok: true,
+  email: result
+});
   } catch (error) {
     console.error(error);
 
