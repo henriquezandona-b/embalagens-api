@@ -59,7 +59,7 @@ export default async function handler(req, res) {
       `,
      attachments: [
   {
-    filename: "embalagens-cassia.xlsx",
+     filename: "embalagens-cassia.xlsx",
     content: excelAtualizado,
     contentType:
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
