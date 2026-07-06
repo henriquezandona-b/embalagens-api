@@ -25,23 +25,27 @@ export default async function handler(req, res) {
 
     const resend = new Resend(process.env.RESEND_API_KEY);
 
-    const data = req.body?.data ?? "";
-    const itens = req.body?.itens ?? [];
-    console.log("DATA:", data);
+   const data = req.body?.data ?? "";
+const itens = req.body?.itens ?? [];
+const excel = req.body?.excel;
+
+console.log("DATA:", data);
 console.log("ITENS:", itens);
 console.log("TOTAL:", itens.length);
-    for (const item of itens) {
+
+for (const item of itens) {
+
   console.log("Salvando:", item);
 
   const { data: retorno, error } = await supabase
     .from("conferencias")
     .insert({
-      data: data,
+      data,
       item: item.item,
       contagem: item.contagem,
       nota: item.nota,
       diferenca: item.diferenca,
-      finalizado: false,
+      finalizado: false
     })
     .select();
 
@@ -49,6 +53,7 @@ console.log("TOTAL:", itens.length);
   console.log("ERRO:", error);
 
   if (error) {
+    console.error(error);
     return res.status(500).json(error);
   }
 }
