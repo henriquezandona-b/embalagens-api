@@ -31,7 +31,7 @@ export default async function handler(req, res) {
           item: item.item,
           contagem: item.contagem,
           nota: item.nota,
-          diferenca: item.diferenca,
+          diferença: item.diferença,
           finalizado: false
         })
         .select();
