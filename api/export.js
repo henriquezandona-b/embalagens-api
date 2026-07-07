@@ -24,10 +24,10 @@ export default async function handler(req, res) {
       return res.status(500).json(error);
     }
 
-    let csv = "ID,Data,Item,Contagem,Nota,Diferenca\n";
+    let csv = "ID,Data,Item,Contagem,Nota,Diferença\n";
 
     data.forEach((row) => {
-      csv += `${row.id},${row.data},${row.item},${row.contagem},${row.nota},${row.diferenca}\n`;
+      csv += `${row.id},${row.data},${row.item},${row.contagem},${row.nota},${row.diferença}\n`;
     });
 
     res.setHeader("Content-Type", "text/csv");
