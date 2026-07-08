@@ -54,7 +54,7 @@ export default async function handler(req, res) {
         total
       }))
       .sort((a,b)=>b.total-a.total)
-      .slice(0,3);
+      .slice(0,5);
 
     return res.status(200).json({
 
