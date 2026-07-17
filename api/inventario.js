@@ -19,51 +19,61 @@ export default async function handler(req, res) {
       });
     }
 
-    const data = req.body?.data ?? "";
-    const itens = req.body?.itens ?? [];
+ const data = req.body?.data ?? "";
+const itens = req.body?.itens ?? [];
 
-    console.log("DATA:", data);
-    console.log("TOTAL ITENS:", itens.length);
+console.log("DATA:", data);
+console.log("TOTAL ITENS:", itens.length);
 
-    for (const item of itens) {
+// APAGA O INVENTÁRIO ANTIGO
+const { error: erroDelete } = await supabase
+  .from("inventario")
+  .delete()
+  .neq("id", 0);
 
-      console.log("SALVANDO:", item);
+if (erroDelete) {
+  console.log(erroDelete);
+  return res.status(500).json(erroDelete);
+}
 
-      const { error } = await supabase
-        .from("inventario")
-        .insert({
+// AGORA SALVA O NOVO
+for (const item of itens) {
 
-          data,
+  console.log("SALVANDO:", item);
 
-          categoria: item.categoria,
+  const { error } = await supabase
+    .from("inventario")
+    .insert({
 
-          item: item.item,
+      data,
 
-          quantidade: item.quantidade
+      categoria: item.categoria,
 
-        });
+      item: item.item,
 
-      if (error) {
-
-        console.log(error);
-
-        return res.status(500).json(error);
-
-      }
-
-    }
-
-    return res.status(200).json({
-
-      ok: true,
-
-      message: "Inventário salvo."
+      quantidade: item.quantidade
 
     });
 
+  if (error) {
+
+    console.log(error);
+
+    return res.status(500).json(error);
+
   }
 
-  catch (erro) {
+}
+
+return res.status(200).json({
+
+  ok: true,
+
+  message: "Inventário salvo."
+
+});
+
+  }catch (erro) {
 
     console.log(erro);
 
