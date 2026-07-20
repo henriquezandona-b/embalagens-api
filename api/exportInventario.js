@@ -1,25 +1,84 @@
 import { supabase } from "../lib/supabase.js";
+import * as XLSX from "xlsx";
 
 export default async function handler(req, res) {
 
-    res.setHeader("Access-Control-Allow-Origin", "*");
+    try {
 
-    if (req.method !== "GET") {
-        return res.status(405).json({
-            error: "Método não permitido"
+        res.setHeader("Access-Control-Allow-Origin", "*");
+        res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+        res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+        if (req.method === "OPTIONS") {
+            return res.status(200).end();
+        }
+
+        if (req.method !== "GET") {
+            return res.status(405).json({
+                error: "Método não permitido"
+            });
+        }
+
+        const { data, error } = await supabase
+            .from("inventario")
+            .select("*")
+            .order("categoria")
+            .order("item");
+
+        if (error) {
+
+            return res.status(500).json(error);
+
+        }
+
+        const planilha = data.map(item => ({
+
+            Categoria: item.categoria.replace(/[^\p{L}\p{N}\s]/gu, "").trim(),
+
+            Item: item.item,
+
+            Quantidade: item.quantidade
+
+        }));
+
+        const wb = XLSX.utils.book_new();
+
+        const ws = XLSX.utils.json_to_sheet(planilha);
+
+        XLSX.utils.book_append_sheet(
+            wb,
+            ws,
+            "Inventário"
+        );
+
+        const buffer = XLSX.write(
+            wb,
+            {
+                type: "buffer",
+                bookType: "xlsx"
+            }
+        );
+
+        res.setHeader(
+            "Content-Type",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        );
+
+        res.setHeader(
+            "Content-Disposition",
+            "attachment; filename=Inventario.xlsx"
+        );
+
+        return res.status(200).send(buffer);
+
+    }
+
+    catch (erro) {
+
+        return res.status(500).json({
+            error: erro.message
         });
+
     }
-
-    const { data, error } = await supabase
-        .from("inventario")
-        .select("*")
-        .order("categoria")
-        .order("item");
-
-    if (error) {
-        return res.status(500).json(error);
-    }
-
-    return res.status(200).json(data);
 
 }
