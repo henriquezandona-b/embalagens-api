@@ -1,44 +1,89 @@
 import { supabase } from "../lib/supabase.js";
+import * as XLSX from "xlsx";
 
 export default async function handler(req, res) {
-  try {
-    // 🔥 CORS
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
-    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
-    if (req.method === "OPTIONS") {
-      return res.status(200).end();
+    try {
+
+        res.setHeader("Access-Control-Allow-Origin", "*");
+        res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+        res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+        if (req.method === "OPTIONS") {
+            return res.status(200).end();
+        }
+
+        if (req.method !== "GET") {
+            return res.status(405).json({
+                error: "Método não permitido"
+            });
+        }
+
+        const { data, error } = await supabase
+            .from("conferencias")
+            .select("*")
+            .order("id", { ascending: true });
+
+        if (error) {
+
+            return res.status(500).json(error);
+
+        }
+
+        const planilha = data.map(item => ({
+
+            ID: item.id,
+
+            Data: item.data,
+
+            Item: item.item,
+
+            Contagem: item.contagem,
+
+            Nota: item.nota,
+
+            Diferença: item.diferenca
+
+        }));
+
+        const wb = XLSX.utils.book_new();
+
+        const ws = XLSX.utils.json_to_sheet(planilha);
+
+        XLSX.utils.book_append_sheet(
+            wb,
+            ws,
+            "Embalagens"
+        );
+
+        const buffer = XLSX.write(
+            wb,
+            {
+                type: "buffer",
+                bookType: "xlsx"
+            }
+        );
+
+        res.setHeader(
+            "Content-Type",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        );
+
+        res.setHeader(
+            "Content-Disposition",
+            "attachment; filename=Embalagens.xlsx"
+        );
+
+        return res.status(200).send(buffer);
+
     }
 
-    if (req.method !== "GET") {
-      return res.status(405).json({ error: "Metodo nao permitido" });
+    catch (erro) {
+
+        return res.status(500).json({
+            error: erro.message
+        });
+
     }
 
-    const { data, error } = await supabase
-      .from("conferencias")
-      .select("*")
-      .order("id", { ascending: true });
-
-    if (error) {
-      return res.status(500).json(error);
-    }
-
-    let csv = "ID,Data,Item,Contagem,Nota,Diferenca\n";
-
-    data.forEach((row) => {
-      csv += `${row.id},${row.data},${row.item},${row.contagem},${row.nota},${row.diferenca}\n`;
-    });
-
-    res.setHeader("Content-Type", "text/csv");
-    res.setHeader(
-      "Content-Disposition",
-      "attachment; filename=embalagens.csv"
-    );
-
-    return res.status(200).send(csv);
-
-  } catch (err) {
-    return res.status(500).json({ error: err.message });
-  }
 }
