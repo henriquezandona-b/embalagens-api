@@ -55,6 +55,36 @@ export default async function handler(req, res) {
       }))
       .sort((a,b)=>b.total-a.total)
       .slice(0,5);
+    const rankingFornecedores = {};
+
+divergencias.forEach(item => {
+
+  let fornecedor =
+    item.item.split(" - ")[0];
+
+  if (
+    fornecedor === "CIE AZUL" ||
+    fornecedor === "CIE CINZA"
+  ) {
+    fornecedor = "CIE";
+  }
+
+  if (!rankingFornecedores[fornecedor]) {
+    rankingFornecedores[fornecedor] = 0;
+  }
+
+  rankingFornecedores[fornecedor]++;
+
+});
+
+const fornecedores = Object.entries(
+  rankingFornecedores
+)
+.map(([fornecedor, total]) => ({
+  fornecedor,
+  total
+}))
+.sort((a,b) => b.total - a.total);
 
     return res.status(200).json({
 
