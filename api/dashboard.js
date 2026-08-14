@@ -88,18 +88,19 @@ const fornecedores = Object.entries(
 
     return res.status(200).json({
 
-      totalDias,
+  totalDias,
 
-      totalItens,
+  totalItens,
 
-      totalDivergencias,
+  totalDivergencias,
 
-      porcentagemAcerto,
+  porcentagemAcerto,
 
-      topItens
+  topItens,
 
-    });
+  fornecedores
 
+});
   }
 
   catch(err){
